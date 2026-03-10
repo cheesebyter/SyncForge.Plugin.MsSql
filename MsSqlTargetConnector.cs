@@ -15,7 +15,10 @@ public sealed class MsSqlTargetConnector : ITargetConnector
         _logger = logger ?? NoOpSyncForgeLogger.Instance;
     }
 
-    public async Task<WriteResult> WriteAsync(IAsyncEnumerable<DataRecord> records, JobContext context)
+    public async Task<WriteResult> WriteAsync(
+        IAsyncEnumerable<DataRecord> records,
+        JobContext context,
+        CancellationToken cancellationToken)
     {
         var options = MsSqlTargetOptions.FromContext(context);
         var strategy = context.StrategyMode;
@@ -37,7 +40,7 @@ public sealed class MsSqlTargetConnector : ITargetConnector
 
         if (context.DryRun)
         {
-            await foreach (var _ in records)
+            await foreach (var _ in records.WithCancellation(cancellationToken))
             {
                 processed++;
                 succeeded++;
@@ -70,7 +73,7 @@ public sealed class MsSqlTargetConnector : ITargetConnector
                 _logger.Info("[MSSQL] Replace transaction begin.");
                 await ClearTargetAsync(connection, options, replaceTx);
 
-                await foreach (var record in records)
+                await foreach (var record in records.WithCancellation(cancellationToken))
                 {
                     batch.Add(record);
                     if (batch.Count >= options.BatchSize)
@@ -108,7 +111,7 @@ public sealed class MsSqlTargetConnector : ITargetConnector
         }
         else
         {
-            await foreach (var record in records)
+            await foreach (var record in records.WithCancellation(cancellationToken))
             {
                 batch.Add(record);
                 if (batch.Count >= options.BatchSize)
