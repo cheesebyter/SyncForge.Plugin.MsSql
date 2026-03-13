@@ -1,14 +1,18 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
+using SyncForge.Abstractions.Configuration;
 using SyncForge.Abstractions.Connectors;
 using SyncForge.Abstractions.Logging;
 using SyncForge.Abstractions.Models;
 
 namespace SyncForge.Plugin.MsSql;
 
-public sealed class MsSqlTargetConnector : ITargetConnector
+[ConnectorCapabilities(ConnectorCapability.Create | ConnectorCapability.Update | ConnectorCapability.Delete | ConnectorCapability.Batch)]
+public sealed class MsSqlTargetConnector : ITargetConnector, IConnectorCapabilityProvider
 {
     private readonly ISyncForgeLogger _logger;
+
+    public ConnectorCapability Capabilities => ConnectorCapability.Create | ConnectorCapability.Update | ConnectorCapability.Delete | ConnectorCapability.Batch;
 
     public MsSqlTargetConnector(ISyncForgeLogger? logger = null)
     {

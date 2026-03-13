@@ -1,3 +1,4 @@
+using SyncForge.Abstractions.Configuration;
 using SyncForge.Abstractions.Models;
 
 namespace SyncForge.Plugin.MsSql;
